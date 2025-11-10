@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  server:
+    build:
+      context: ./server
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DB_USER=postgres
+      - DB_PASSWORD=pass1234.  
+      - DB_HOST=db                
+      - DB_PORT=5432
+      - DB_DATABASE=perntodo
+    depends_on:
+      db:
+        condition: service_healthy
+  client:
+    build:
+      context: ./client
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+  db:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pass1234.
+      - POSTGRES_DB=perntodo
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d perntodo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+volumes:
+  pgdata:
