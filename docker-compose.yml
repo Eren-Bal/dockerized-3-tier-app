@@ -8,7 +8,7 @@ services:
     environment:
       - PORT=8000
       - DB_USER=postgres
-      - DB_PASSWORD=pass1234.  
+      - DB_PASSWORD={POSTGRES_PASSWORD}  
       - DB_HOST=db                
       - DB_PORT=5432
       - DB_DATABASE=perntodo
@@ -26,7 +26,7 @@ services:
     image: postgres:14-alpine
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=pass1234.
+      - POSTGRES_PASSWORD={POSTGRES_PASSWORD}
       - POSTGRES_DB=perntodo
     volumes:
       - pgdata:/var/lib/postgresql/data
