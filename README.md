@@ -1,71 +1,49 @@
+# 3 Katmanlı PERN Stack Uygulamasının Docker ile Paketlenmesi
 
-# PERN ToDo App
+Bu proje, bir portfolyo çalışması olup, 3 katmanlı (Frontend, Backend, Database) modern bir web uygulamasının **Docker** ve **Docker Compose** kullanılarak nasıl "containerize" edileceğini ve production'a hazır hale getirileceğini göstermektedir.
 
-This project implements a simple ToDo application using the PERN stack: PostgreSQL, Express.js, React, and Node.js. This app allows you to manage your tasks, mark them as complete, and remove them from your list.
+Bu projede, DevOps süreçlerinde sıkça karşılaşılan "race condition" (yarış durumu), konfigürasyon yönetimi ve güvenlik açığı (koda gömülü sırlar) gibi sorunlar tespit edilmiş ve çözümleri uygulanmıştır.
 
-## Features
-```
-- Create new tasks with descriptions.
-- Edit tasks as per need.
-- Delete tasks from the list.
-- View all tasks and their statuses.
-```
-## Technologies
+## 👣 Projenin Çözdüğü DevOps Zorlukları
 
-- Front-End: React.js
-- Back-End: Express.js, Node.js
-- Database: PostgreSQL
+Bu proje sadece servisleri başlatmakla kalmaz, aynı zamanda:
 
-## Installation
+* **Güvenlik:** Veritabanı şifresi gibi sırlar (secrets), `.env` dosyası kullanılarak `docker-compose.yml` dosyasından çıkarılmış ve güvence altına alınmıştır.
+* **Stabilite (Healthcheck):** Backend servisinin (`server`), veritabanı (`db`) tam olarak bağlantı kabul etmeye hazır olana kadar beklemesi için `docker-compose.yml` içine `healthcheck` ve `condition: service_healthy` kuralları eklenmiştir.
+* **Veri Kalıcılığı:** Veritabanının silinmesi durumunda verilerin kaybolmaması için `volumes` kullanılmıştır.
+* **Otomatik Kurulum:** PostgreSQL veritabanı ilk kez başladığında, `init.sql` dosyası kullanılarak `todo` tablosunun otomatik olarak oluşturulması sağlanmıştır.
+* **Optimizasyon (Multi-Stage Build):** Frontend (React) imajı, `multi-stage build` tekniği kullanılarak gereksiz build araçları (`node`, `npm`) olmadan, sadece Nginx ve statik dosyaları içerecek şekilde optimize edilmiştir. Bu, imaj boyutunu küçültür ve güvenliği artırır.
 
-1. Clone the repository:
+## 🛠️ Kullanılan Teknolojiler
 
-   ```bash
-   git clone https://github.com/vickytilotia/PERN-ToDo-App.git
-   ```
+* **Frontend:** React.js (Nginx ile servis ediliyor)
+* **Backend:** Node.js (Express)
+* **Database:** PostgreSQL (14-Alpine)
+* **Containerization:** Docker
+* **Orchestration (Yerel):** Docker Compose
 
-2. Navigate to the project directory:
+## 🚀 Projeyi Çalıştırma (Kurulum)
 
-   ```bash
-   cd PERN-ToDo-App
-   ```
+Bu projeyi kendi bilgisayarınızda çalıştırmak için **Docker** ve **Docker Compose** yüklü olmalıdır.
 
-3. Install dependencies for both the server and client:
+1.  Bu repoyu klonlayın:
+    ```bash
+    git clone [https://github.com/Eren-Bal/dockerized-3-tier-app.git](https://github.com/Eren-Bal/dockerized-3-tier-app.git)
+    cd dockerized-3-tier-app
+    ```
 
-   ```bash
-   cd client
-   npm install
-   cd ../server
-   npm install
-   ```
+2.  `.env.example` dosyasını `.env` olarak kopyalayın ve içine bir şifre girin:
+    ```bash
+    cp .env.example .env
+    # .env dosyasını açıp bir şifre belirleyin
+    ```
+    (Windows'ta `cp` yerine `copy` kullanın: `copy .env.example .env`)
 
-4. Set up your PostgreSQL database and update the database connection details in `server/db.js`.
+3.  Tüm servisleri inşa edin ve ayağa kaldırın:
+    ```bash
+    docker-compose up --build
+    ```
 
-5. Run the server and client concurrently:
+4.  Tarayıcınızı açın ve `http://localhost:3000` adresine gidin.
 
-   ```bash
-   npm run dev
-   ```
-
-6. The app will be accessible at `http://localhost:3000`.
-
-## Usage
-
-- Create tasks/ todos.
-- Get all details of todos
-- Delete and Update todos.
-
-## SnapShots
-![image](https://github.com/vickytilotia/PERN-ToDo-App/assets/32337899/55fc7f56-1889-473a-908f-2ae49e2fd0c2)
-
-
-## Contributing
-
-Contributions are welcome! If you find any issues or want to enhance the project, feel free to create a pull request.
-
-1. Fork the repository.
-2. Create a new branch for your feature: `git checkout -b feature-name`.
-3. Commit your changes: `git commit -am 'Add feature'`.
-4. Push to the branch: `git push origin feature-name`.
-5. Submit a pull request.
-
+Tebrikler! ToDo listeniz çalışıyor.
