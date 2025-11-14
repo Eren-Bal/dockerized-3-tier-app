@@ -1,0 +1,60 @@
+# GitHub Actions Workflow Dosyası
+name: Docker CI/CD Pipeline for PERN Stack
+
+# 1. Tetikleyici (Trigger)
+# Bu pipeline ne zaman çalışacak?
+on:
+  push:
+    branches:
+      - main  # Sadece 'main' branch'ine bir 'push' yapıldığında çalışır.
+
+# 2. İşler (Jobs)
+# Bu pipeline hangi işleri yapacak?
+jobs:
+  # --- Birinci İş: Client (Frontend) İmajını Build Et ve Push'la ---
+  build-and-push-client:
+    runs-on: ubuntu-latest # Bu iş, Ubuntu (Linux) makinesinde çalışacak
+    steps:
+      # Adım 1: GitHub deposundaki kodları bu Ubuntu makinesine indir
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Adım 2: Docker Hub'a giriş yap (Güvenli bir şekilde)
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Adım 3: Docker imajını build et ve Docker Hub'a push'la
+      - name: Build and push client image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client # Dockerfile'ın nerede olduğunu söyler (client klasörü)
+          file: ./client/Dockerfile # Dockerfile'ın tam yolunu belirtir
+          push: true # 'true' olduğu için imajı build ettikten sonra push'lar
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/pern-client:latest # İmajın etiket adı
+
+  # --- İkinci İş: Server (Backend) İmajını Build Et ve Push'la ---
+  build-and-push-server:
+    runs-on: ubuntu-latest # Bu da ayrı bir Ubuntu makinesinde çalışacak
+    steps:
+      # Adım 1: Kodları indir
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Adım 2: Docker Hub'a giriş yap
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Adım 3: Docker imajını build et ve Docker Hub'a push'la
+      - name: Build and push server image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server # Dockerfile'ın nerede olduğunu söyler (server klasörü)
+          file: ./server/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/pern-server:latest # İmajın etiket adı
